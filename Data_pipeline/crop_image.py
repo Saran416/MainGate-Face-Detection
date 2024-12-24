@@ -4,7 +4,7 @@ import cv2
 import os
 
 class Cropping:
-    def __init__(self, image_path, output_directory,name, offset_w=30, offset_h=30):
+    def __init__(self, image_path, output_directory,name, offset_w=25, offset_h=25):
         """
         Initialize the cropping utility.
         :param image_path: Path to the input image.
@@ -14,10 +14,11 @@ class Cropping:
         """
         self.image_path = image_path
         self.output_directory = output_directory
+        self.name = name
         self.offset_w = offset_w
         self.offset_h = offset_h
-        self.detector = FaceDetector(minDetectionCon=0.5, modelSelection=0)
-        self.name = name
+        self.detector = FaceDetector(minDetectionCon=0.5, modelSelection=0) # modelSelection: 0 for short-range detection (2 meters), 1 for long-range detection (5 meters)
+
         self._ensure_output_directory()
 
     def _ensure_output_directory(self):
@@ -57,19 +58,21 @@ class Cropping:
 
 
             image_name = self.name+"_cropped.jpg"
-            image_path = os.path.join(self.output_directory, image_name)
-            cv2.imwrite(image_path, cropped_face)
-            print(f"Cropped face saved at: {self.image_path}")
+            img_path = os.path.join(self.output_directory, image_name)
+            cv2.imwrite(img_path, cropped_face)
+            print(f"Cropped face saved at: {img_path}")
+        return img_path
 
 if __name__ == "__main__":
     # Parameters
-    image_path = "/Users/harshsingh/Desktop/face/Database/Harsh/Harsh_withoutcrop.jpg"
-    output_directory = "/Users/harshsingh/Desktop/face/Data_pipeline/"
-    offset_percentage_w = 30  # 30% width offset
-    offset_percentage_h = 30  # 30% height offset
+    image_path = "/Users/harshsingh/Desktop/projects/face/indian celebrities dataset/data/aadhi/220px_Aadhi_Pinisetty_at_Maragatha_Naanayam_audio_launch.jpg"
+    output_directory = "/Users/harshsingh/Desktop/projects/face/Data_pipeline"
+    name = "random"
+    offset_percentage_w = 20  # 30% width offset
+    offset_percentage_h =  20# 30% height offset
 
     # Initialize the cropping utility
-    cropper = Cropping(image_path, output_directory,"NAME", offset_percentage_w, offset_percentage_h)
+    cropper = Cropping(image_path, output_directory, name , offset_percentage_w, offset_percentage_h)
     
     # Perform face cropping
     cropper.crop_faces()
