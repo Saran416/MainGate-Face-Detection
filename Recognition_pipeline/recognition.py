@@ -22,8 +22,7 @@ import cv2
 import os
 from tensorflow.keras.models import model_from_json
 import time
-
-
+from Sqldb.SQL import retrieve_embeddings
 
 
 model = tf.keras.models.load_model('/Users/harshsingh/Desktop/projects/face/model')
@@ -37,35 +36,9 @@ def img_to_encoding(image_path, model):
     return embedding / np.linalg.norm(embedding, ord=2)
 
 
-database = {}
-base_dir = "/Users/harshsingh/Desktop/projects/face/indian celebrities dataset/cropped_data"
-
-
-time_build_databse = time.time()
-for name in os.listdir(base_dir):
-    folder_path = os.path.join(base_dir, name)
-    
-    # Ensure the path is a directory
-    if os.path.isdir(folder_path):
-        database[name] = []  # Initialize an empty list for the name
-        count = 0  # Reset count for each person
-        
-        for image in os.listdir(folder_path):
-            if count == 3:  # Stop after 5 images
-                break
-            
-            img_path = os.path.join(folder_path, image)
-            
-            # Ensure the path is a valid file
-            if os.path.isfile(img_path):
-                # Process the image to get its embedding
-                embedding = img_to_encoding(img_path, FRmodel)
-                database[name].append(embedding)  # Add embedding to the list
-                count += 1  # Increment the count
-
-time_build_databse = time.time() - time_build_databse
-print(f"Time taken to build the database: {time_build_databse} seconds")
-print(f""""Database created successfully! Number of entries are {len(database)}""")
+path_to_db = "/Users/harshsingh/Desktop/projects/face/Recognition_pipeline/Sqldb/face_database.db"
+database = retrieve_embeddings(path_to_db)
+print(f""""Database retrieved successfully! Number of entries are {len(database)}""")
 
 
 
@@ -96,59 +69,9 @@ output_path = "/Users/harshsingh/Desktop/projects/face"
 woffset = 0
 hoffset = 0
 name = "Ranbir_Kapoor_1"
-
-time_croping = time.time()
 cropper = Cropping(test_path, output_path, name , woffset, hoffset)
 test_path = cropper.crop_faces()
 
-time_croping = time.time() - time_croping 
-print(f"Time taken to crop the image: {time_croping} seconds")
 
-time_find_identity = time.time()
 dis, name = who_is_it(test_path, database, FRmodel)
-
-time_find_identity = time.time() - time_find_identity
-print(f"Time taken to find the identity: {time_find_identity} seconds")
-print(f"Distance: {dis} \n Identity: {name}")
-
-
-test_path = "/Users/harshsingh/Desktop/projects/face/test.jpeg"
-output_path = "/Users/harshsingh/Desktop/projects/face"
-woffset = 10
-hoffset = 10
-name = "Ranbir_Kapoor_2"
-
-time_croping = time.time()
-cropper = Cropping(test_path, output_path, name , woffset, hoffset)
-test_path = cropper.crop_faces()
-
-time_croping = time.time() - time_croping 
-print(f"Time taken to crop the image: {time_croping} seconds")
-
-time_find_identity = time.time()
-dis, name = who_is_it(test_path, database, FRmodel)
-
-time_find_identity = time.time() - time_find_identity
-print(f"Time taken to find the identity: {time_find_identity} seconds")
-print(f"Distance: {dis} \n Identity: {name}")
-
-
-test_path = "/Users/harshsingh/Desktop/projects/face/test.jpeg"
-output_path = "/Users/harshsingh/Desktop/projects/face"
-woffset = 15
-hoffset = 15
-name = "Ranbir_Kapoor_3"
-
-time_croping = time.time()
-cropper = Cropping(test_path, output_path, name , woffset, hoffset)
-test_path = cropper.crop_faces()
-
-time_croping = time.time() - time_croping 
-print(f"Time taken to crop the image: {time_croping} seconds")
-
-time_find_identity = time.time()
-dis, name = who_is_it(test_path, database, FRmodel)
-
-time_find_identity = time.time() - time_find_identity
-print(f"Time taken to find the identity: {time_find_identity} seconds")
 print(f"Distance: {dis} \n Identity: {name}")
