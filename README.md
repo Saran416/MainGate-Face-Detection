@@ -24,9 +24,7 @@ pip install -r requirements.txt
 
 ## Project Structure
 
-The final project is in the Final Directory.
-
-It has
+Data Pipeline:
 
 1. **app.py**
 
@@ -37,13 +35,22 @@ It has
 
 ```bash
 streamlit run app.py
+
 ```
+
+2. **crop_image.py**
+
+- This file contains the function to crop the face from the image.
+
+The model
+
+1. **verification.ipynb**
+
+- This file contains the code to train the verification model.
 
 2. **recognition.ipynb**
 
-3. **crop_image.py**
-
-- This file contains the function to crop the face from the image.
+- This file contains the code to train the recognition model.
 
 ## Future Improvements
 

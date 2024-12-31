@@ -1,14 +1,8 @@
-import cvzone
 from cvzone.FaceDetectionModule import FaceDetector
-import cv2
-import os
 
 class Cropper:
     def __init__(self, offset_w=25, offset_h=25):
         """
-        Initialize the cropping utility.
-        :param image_path: Path to the input image.
-        :param output_directory: Directory to save cropped faces.
         :param offset_w: Percentage width offset for cropping.
         :param offset_h: Percentage height offset for cropping.
         """
@@ -20,7 +14,6 @@ class Cropper:
         """
         Detects faces in the image and crops them with offsets.
         """
-        # detector = FaceDetector(minDetectionCon=0.5, modelSelection=0)
         image, bboxs = self.detector.findFaces(image, draw=False)
         if not bboxs:
             return None
