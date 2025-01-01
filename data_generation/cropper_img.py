@@ -46,17 +46,3 @@ class Cropping:
         return cropped_face
 
 
-# Example Usage
-if __name__ == "__main__":
-    # Load an image
-    input_image_path = "/Users/harshsingh/Desktop/projects/face/test.jpeg"
-    input_image = cv2.imread(input_image_path)
-
-    # Initialize the cropping class
-    face_cropper = Cropping()
-    # Crop faces
-    cropped_face = face_cropper.crop_face(input_image)
-    print("sa")
-    cv2.imwrite("/Users/harshsingh/Desktop/projects/face/cropped_img.jpeg",cropped_face)
-    print("Saved")
-    cv2.destroyAllWindows()
