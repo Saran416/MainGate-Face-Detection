@@ -1,2 +1,5 @@
 __pycache__
 **/__pycache__
+./data_generation/data
+./data_generation/cropped_data
+./data_generation/test_images
