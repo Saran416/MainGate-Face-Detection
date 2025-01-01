@@ -11,7 +11,7 @@ from tensorflow.keras.layers import Lambda, Flatten, Dense
 from tensorflow.keras.initializers import glorot_uniform
 from tensorflow.keras.layers import Layer
 from tensorflow.keras import backend as K
-from Recognition_pipeline.crop_image import Cropping
+from server_pipeline.crop_image import Cropping
 K.set_image_data_format('channels_last')
 import numpy as np
 from numpy import genfromtxt
@@ -28,8 +28,7 @@ from Sqldb.SQL import retrieve_embeddings
 model = tf.keras.models.load_model('/Users/harshsingh/Desktop/projects/face/model')
 FRmodel = model
 
-def img_to_encoding(image_path, model):
-    img = tf.keras.preprocessing.image.load_img(image_path, target_size=(160, 160))
+def img_to_encoding(img, model):
     img = np.around(np.array(img) / 255.0, decimals=12)
     x_train = np.expand_dims(img, axis=0) # add a dimension of 1 as first dimension
     embedding = model.predict_on_batch(x_train)
@@ -42,9 +41,9 @@ print(f""""Database retrieved successfully! Number of entries are {len(database)
 
 
 
-def who_is_it(image_path, database, model):
+def who_is_it(img, database, model):
     
-    encoding =  img_to_encoding(image_path, model)
+    encoding =  img_to_encoding(img, model)
 
     min_dist = 1000
     identity = None
