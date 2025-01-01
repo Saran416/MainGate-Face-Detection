@@ -1,59 +1,87 @@
 import streamlit as st
 import cv2
-import os
+import numpy as np
 from PIL import Image
+from deepface import DeepFace
 
-def save_image(image, name):
-    """Save the image in the Database folder under the user's name."""
-    base_folder = "../Database"
-    if not os.path.exists(base_folder):
-        os.makedirs(base_folder)
-    
-    # Create a subfolder for the user
-    user_folder = os.path.join(base_folder, name)
-    if not os.path.exists(user_folder):
-        os.makedirs(user_folder)
-    
-    # Save the image
-    image_name = name+"_withoutcrop.jpg"
-    image_path = os.path.join(user_folder, image_name)
-    cv2.imwrite(image_path, image)
-    return image_path
+def detect_face(image):
+    try:
+        # Use DeepFace to detect faces
+        result = DeepFace.extract_faces(image, enforce_detection=False)
 
-def main():
-    st.title("Face Capture App")
-    st.write("This app will capture your face and save it to the database.")
-
-    # Ask for the user's name
-    name = st.text_input("Enter your name:")
-    if not name:
-        st.warning("Please enter your name to proceed.")
-        return
-
-    # Start the camera
-    if st.checkbox("Start Camera"):
-        cap = cv2.VideoCapture(0)
-        captured = st.empty()
-        pr = st.button("Capture Image")
-        st.info("Make sure your face is centered in the frame!")
-
-        while True:
-            ret, frame = cap.read()
-            if not ret:
-                st.error("Failed to access the webcam. Make sure it's connected.")
-                break
+        print("Face detection result:", result)
+        
+        # If result is not empty, extract face information
+        if result:
+            # Iterate through faces detected
+            for face in result:
+                # Ensure 'region' exists in face info
+                if 'facial_area' in face:
+                    x = int(face['facial_area']['x'])
+                    y = int(face['facial_area']['y'])
+                    w = int(face['facial_area']['w'])
+                    h = int(face['facial_area']['h'])
+                    cv2.rectangle(image, (x, y), (x + w, y + h), (255, 0, 0), 2)
+                else:
+                    print("No 'region' key in detected face")
+        else:
+            print("No faces detected")
             
-            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            captured.image(frame_rgb, channels="RGB")
+        return image, result
+    except Exception as e:
+        print(f"Error in face detection: {e}")
+        return image, []
 
-            # Detect if the user's face is centered (optional)
-            if pr:
-                saved_image_path = save_image(frame, name)
-                st.success(f"Image saved to {saved_image_path}")
-                break
 
-        cap.release()
-        cv2.destroyAllWindows()
+def anti_spoofing(image, faces):
+    if not faces:
+        print("No faces for anti-spoofing")
+        return image
 
-if __name__ == "__main__":
-    main()
+    # Perform anti-spoofing for each detected face
+    for face in faces:
+        if 'facial_area' in face:
+            x = int(face['facial_area']['x'])
+            y = int(face['facial_area']['y'])
+            w = int(face['facial_area']['w'])
+            h = int(face['facial_area']['h'])
+            face_img = image[y:y + h, x:x + w]
+            try:
+                if face_img.size == 0:
+                    raise ValueError("Empty face image, skipping analysis.")
+                
+                # Anti-spoofing analysis (already in your code)
+                result = DeepFace.analyze(face_img, enforce_detection=False, anti_spoofing=True)
+                cv2.putText(image, "Real", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 255), 2)
+            except Exception as e:
+                print(f"Error in anti-spoofing: {e}")
+                cv2.putText(image, "Fake", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 255), 2)
+        else:
+            print("No 'region' key in face for anti-spoofing")
+    
+    return image
+
+ 
+
+# Streamlit camera input to capture image
+image_file = st.camera_input("Capture an image")
+
+if image_file is not None:
+    # Open the image file and convert it to a numpy array
+    img = Image.open(image_file)
+    img = np.array(img)
+    
+    # Convert the image from RGB (PIL) to BGR (OpenCV)
+    img_bgr = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+    
+    # Detect face and draw a rectangle around it using DeepFace
+    img_with_guideline, faces = detect_face(img_bgr)
+    
+    # Apply anti-spoofing analysis
+    img_with_guideline_and_anti_spoof = anti_spoofing(img_with_guideline, faces)
+    
+    # Convert back to RGB for Streamlit display
+    img_with_guideline_rgb = cv2.cvtColor(img_with_guideline_and_anti_spoof, cv2.COLOR_BGR2RGB)
+    
+    # Show the image with face guideline and anti-spoofing
+    st.image(img_with_guideline_rgb, caption="Image with Face Detection and Anti-Spoofing", use_container_width=True)

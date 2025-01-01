@@ -1,14 +1,19 @@
 # Face Verification System
 
 ## Setup
+
 ### Create a Conda Environment
+
 Run the following command to create a new Conda environment named `tf2`:
+
 ```bash
 conda create --name tf2 python==3.9.21
 ```
 
 ### Install Requirements
+
 Use the provided `requirements.txt` file to install dependencies:
+
 ```bash
 pip install -r requirements.txt
 ```
@@ -19,47 +24,36 @@ pip install -r requirements.txt
 
 ## Project Structure
 
-### Data Pipeline Folder
-This folder contains the following files:
+Data Pipeline:
 
-- **`test.py`**
-  - Captures images from Streamlit using the webcam.
-  - **Known Issue:** Occasionally captures and stores completely black images due to an infinite loop issue.
+1. **app.py**
 
-- **`crop_image.py`**
-  - Crops images to a specified size, adjustable using height and width offsets.
+- This is the main file to run the streamlit app.
+- It captures the image using the webcam.
+- crops the face using Face Detection.
+- saves the image in a MongoDB database.
 
-- **`webcam_capture.py`**
-  - Integrates the functionality of image capture via Streamlit and cropping to restrict the image to the face.
-  - Saves the cropped image to the `Database` folder under a subfolder named after the user-provided name in Streamlit.
+```bash
+streamlit run app.py
 
-### `face.ipynb`
-- Jupyter Notebook for:
-  1. Running face verification.
-  2. Creating the database (currently implemented using a dictionary).
+```
 
----
+2. **crop_image.py**
 
-## Steps to Run
+- This file contains the function to crop the face from the image.
 
-### Data Collection
-1. Navigate to the `Data_pipeline` folder.
-2. Run the following command to start the Streamlit app for data collection:
-   ```bash
-   streamlit run webcam_capture.py
-   ```
-3. Use the app to capture and save images.
+The model
 
-### Face Verification
-1. Open the `face.ipynb` notebook.
-2. Follow the instructions within the notebook to:
-   - Verify faces.
-   - Manage the database.
+1. **verification.ipynb**
 
----
+- This file contains the code to train the verification model.
+
+2. **recognition.ipynb**
+
+- This file contains the code to train the recognition model.
 
 ## Future Improvements
-1. Develop a final integration pipeline in `.py` format.
+
 2. Implement a more robust database solution.
 3. Train and integrate a face verification model.
 4. Explore data augmentation techniques for improved model performance.
