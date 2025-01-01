@@ -1,7 +1,6 @@
 import math
 import time
 import os
-
 import cv2
 import cvzone
 from ultralytics import YOLO
@@ -36,6 +35,7 @@ try:
     while True:
         # Read frame from webcam
         success, img = cap.read()
+        img.flip(1)  # Flip the image horizontally
         if not success:
             print("Failed to read from webcam.")
             break

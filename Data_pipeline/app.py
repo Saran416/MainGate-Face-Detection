@@ -12,6 +12,13 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
+client = MongoClient('localhost', 27017)
+db_images = client['face_database']
+db_vectors = client['face_vectors']
+fs = gridfs.GridFS(db_images, "faces")
+collection = db_images["faces"]
+vector_collection = db_vectors["vectors"]
+
 # Asynchronous save_image function
 async def save_image(image, name, update=False):
     """Save or update the image in the database under the user's name."""
@@ -27,12 +34,6 @@ async def save_image(image, name, update=False):
 
     # Save or update the image in Mongodb_images
     try:
-        client = MongoClient('localhost', 27017)
-        db_images = client['face_database']
-        db_vectors = client['face_vectors']
-        fs = gridfs.GridFS(db_images, "faces")
-        collection = db_images["faces"]
-        vector_collection = db_vectors["vectors"]
         vector = img_to_encoding(image)
         vector = vector[0].tolist()
         st.write("Vector: ", vector)

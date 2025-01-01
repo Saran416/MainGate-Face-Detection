@@ -5,7 +5,7 @@ from scipy.spatial import distance
 
 # Load the pre-trained face detector and facial landmarks predictor
 face_detector = dlib.get_frontal_face_detector()
-predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
+predictor = dlib.shape_predictor("./spoof_detection/shape_predictor_68_face_landmarks.dat")
 
 # Define the eye aspect ratio (EAR) to detect blinks
 def eye_aspect_ratio(eye):
