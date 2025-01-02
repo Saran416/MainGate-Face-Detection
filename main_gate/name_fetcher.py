@@ -5,6 +5,7 @@ import numpy as np
 import tensorflow as tf
 from pymongo import MongoClient
 import pickle
+from time import time
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -101,7 +102,7 @@ class Fetcher():
         img_vector = np.array(img_vector)
         for vector in vectors:
             if np.linalg.norm(np.array(vector['encoding']) - img_vector) < self.min_similarity:
-                return vector['name']
+                return vector['name'], class_name
         return None, class_name
 
     # check if the image is in the database
@@ -125,6 +126,7 @@ class Fetcher():
 
     # fetch the name of the image (optimized)
     def fetch_name(self, img):
+        start = time()
         name, class_name = self.check_in_collection(img)
         if not name:
             print("Miss in collection")
@@ -135,6 +137,7 @@ class Fetcher():
                 print("Hit in database")
         else:
             print("Hit in collection")
+        print("Time taken:", time() - start)
         print('')
         return name
 
@@ -149,16 +152,24 @@ class Fetcher():
 
     # fetch the name of the name (without optimization)
     def fetch_name_unoptimized(self, img):
-        db = self.client('unoptimized_image_db')
+        start = time()
+        db = self.client['unoptimized_image_db']
         img_vector = self.img_to_encoding(img)
         if img_vector is None:
             return None
         img_vector = [img_vector.flatten()]
         collection = db["vectors"]
         vectors = collection.find({})
+        print(len(list(vectors)))
         img_vector = np.array(img_vector)
         for vector in vectors:
             if np.linalg.norm(np.array(vector['encoding']) - img_vector) < self.min_similarity:
+                print("Hit in database")
+                print("Time taken:", time() - start)
+                print('')
                 return vector['name']
+        print("Miss in database")
+        print("Time taken:", time() - start)
+        print('')
         return None
         

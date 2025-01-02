@@ -9,3 +9,4 @@ pyarrow==18.1.0
 pymongo==4.10.1
 streamlit==1.41.1
 tensorflow==2.14.1
+opencv-python==4.10.0.84

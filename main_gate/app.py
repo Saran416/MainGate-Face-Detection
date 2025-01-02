@@ -8,11 +8,11 @@ warnings.filterwarnings("ignore")
 
 checker = Checker()
 fetcher = Fetcher(load_vectors=False)
+# fetcher.save_to_unoptimized_db()
 # fetcher.save_vectors('./img_vectors.pkl') 
 
 
 # fetcher.save_to_db()
-
 cap = cv2.VideoCapture(0)
 cap.set(3, 640)
 cap.set(4, 480)
