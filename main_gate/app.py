@@ -43,10 +43,12 @@ while True:
     image, foundface, face = checker.idle(image)
 
 
+
     current_time = time.time()
     if current_time - prev_time >= buffer:
         
         if foundface:
+            # cv2.imwrite("test1.jpg", face)
             name = fetcher.fetch_name(face)
         else:
             name = "No face detected"
