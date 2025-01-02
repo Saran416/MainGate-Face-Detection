@@ -77,12 +77,21 @@ try:
         img = cv2.flip(img, 1)
         count = count + 1
         if(count >10):
-            cropped_face = cropper.crop_face(img)
-            path  = f"/Users/harshsingh/Desktop/projects/face/img_{count}.jpeg"
-            cv2.imwrite(path, cropped_face)
-            dis, name = who_is_it(path, database, FRmodel)
-            cv2.imshow("Webcam", cropped_face)
-            time.sleep(2)
+            if(cropper.crop_face(img) != False):
+
+                cropped_face, box = cropper.crop_face(img)
+
+                path  = f"/Users/harshsingh/Desktop/projects/face/img_{count}.jpeg"
+                cv2.imwrite(path, cropped_face)
+                dis, name = who_is_it(path, database, FRmodel)
+
+                img_with_box = cv2.rectangle(img, (box[0], box[1]), (box[0] + box[2], box[1] + box[3]), (0, 255, 0), 3)
+                cv2.imshow("Webcam",img_with_box)
+                time.sleep(1)
+            else:
+                time.sleep(1)
+                cv2.imshow("Webcam",img)
+                pass
 
         # Break loop if 'q' is pressed
         if cv2.waitKey(1) & 0xFF == ord('q'):

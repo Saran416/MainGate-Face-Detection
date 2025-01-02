@@ -29,7 +29,7 @@ class Cropping:
 
         if not bboxs:
             print("No faces detected in the image.")
-            return 
+            return False
         for i, bbox in enumerate(bboxs):
             # Get bounding box coordinates and size
             x, y, w, h = bbox['bbox']
@@ -41,9 +41,16 @@ class Cropping:
             y = int(y - offsetH * 3)
             h = int(h + offsetH * 3.5)
 
+            # Check if the bounding box is within the image dimensions
+            img_height, img_width = img.shape[:2]
+            if x < 0 or y < 0:
+                return False  # Top-left corner of the bounding box is outside the image
+            if x + w > img_width or y + h > img_height:
+                return False
             # Crop the region of interest
+            
             cropped_face = img[y:y + h, x:x + w]
-        return cropped_face
+        return cropped_face, [x, y, w, h]
 
 
 # Example Usage
