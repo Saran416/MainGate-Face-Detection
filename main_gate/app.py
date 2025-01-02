@@ -1,95 +1,88 @@
-import math
-import time
-import os
 import cv2
-import cvzone
-from ultralytics import YOLO
-import warnings
+import time
+from spoof_checker import Checker
+from name_fetcher import Fetcher
 
+import warnings
 warnings.filterwarnings("ignore")
 
-# Confidence threshold
-confidence = 0.85
+checker = Checker()
+fetcher = Fetcher(load_vectors=False)
+# fetcher.save_to_unoptimized_db()
+# fetcher.save_vectors('./img_vectors.pkl') 
 
-# Open webcam
+
+# fetcher.save_to_db()
 cap = cv2.VideoCapture(0)
-cap.set(3, 640)  # Set width
-cap.set(4, 480)  # Set height
+cap.set(3, 640)
+cap.set(4, 480)
 
-# Load YOLO model
-model = YOLO("./spoof_detection/l_version_1_300.pt")
+if not cap.isOpened():
+    print("Error: Could not open webcam.")
+    exit(1)
 
-# Class names for prediction
-classNames = ["real", "fake"]
+prev = 0
+next = 0
+fps = 0
+num = 0
+prev_time = 0
+name = None
+buffer = 3
+color = (0, 0, 255)
 
-# Initialize variables
-prev_frame_time = 0  # Initial value to save the first frame
-buffer = 5  # Buffer time in seconds
-first = True
+prev_name = None
+
+while True:
+    # Capture frame from the webcam
+    success, image = cap.read()
+    if not success:
+        print("Failed to read from webcam.")
+        break
+
+    image = cv2.flip(image, 1)
+    image, foundface, face = checker.idle(image)
 
 
-# Ensure 'images' directory exists
-os.makedirs("images", exist_ok=True)
+    current_time = time.time()
+    if current_time - prev_time >= buffer:
+        
+        if foundface:
+            name = fetcher.fetch_name(face)
+        else:
+            name = "No face detected"
+        
+        if not name:
+            name = "Invalid Person"
+          
+        
+        if name != prev_name or color == (0, 0, 255):
+            is_real = checker.check_spoof()
 
-try:
-    while True:
-        # Read frame from webcam
-        success, img = cap.read()
-        img.flip(1)  # Flip the image horizontally
-        if not success:
-            print("Failed to read from webcam.")
-            break
+        if is_real:
+            color = (0, 255, 0)
+        else:
+            color = (0, 0, 255)
+                
+        prev_time = current_time
+        prev_name = name 
 
-        # Predict with YOLO model
-        results = model(img, stream=True, verbose=False)
-        for r in results:
-            boxes = r.boxes
-            for box in boxes:
-                # Bounding Box
-                x1, y1, x2, y2 = box.xyxy[0]
-                x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
-                w, h = x2 - x1, y2 - y1
+    # Calculate the position for the text
+    text_size = cv2.getTextSize(name, cv2.FONT_HERSHEY_SIMPLEX, 1, 2)[0]
 
-                # Confidence
-                conf = math.ceil((box.conf[0] * 100)) / 100
+    # Calculate the position for the text
+    cv2.putText(image, name, (5, 470), cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2)
+    # Show the output image
+    cv2.imshow("Output", image)
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        print("Average FPS:", fps / num)
+        break
 
-                # Class Name
-                cls = int(box.cls[0])
-                if conf > confidence:
-                    if classNames[cls] == 'real':
-                        color = (0, 255, 0)
-                        # print("Real face detected.", time.time())
-                        # Save the image if the buffer time has elapsed
-                        if (time.time() - prev_frame_time > buffer) or first:
-                            print("Saving image...")
-                            cropped_img = img[y1:y2, x1:x2]  # Crop the detected region
-                            timestamp = time.strftime("%Y%m%d_%H%M%S")
-                            cv2.imwrite(f"images/{timestamp}.jpg", cropped_img)
-                            prev_frame_time = time.time()
-                            first = False
-                            
-                    else:
-                        color = (0, 0, 255)
+    # Calculate FPS
+    prev = next
+    next = time.time()
+    fps += 1 / (next - prev)
+    num += 1
 
-                    # Draw bounding box and text
-                    cvzone.cornerRect(img, (x1, y1, w, h), colorC=color, colorR=color)
-                    cvzone.putTextRect(
-                        img, f'{classNames[cls].upper()} {int(conf * 100)}%',
-                        (max(0, x1), max(35, y1)), scale=2, thickness=4,
-                        colorR=color, colorB=color
-                    )
-
-        # Display the frame
-        cv2.imshow("Image", img)
-
-        # Break loop if 'q' is pressed
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-
-except Exception as e:
-    print(f"Error: {e}")
-
-finally:
-    # Release resources
-    cap.release()
-    cv2.destroyAllWindows()
+# Release resources
+cv2.destroyAllWindows()
+cap.release()
