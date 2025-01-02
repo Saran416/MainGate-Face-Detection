@@ -57,6 +57,7 @@ class Fetcher():
     def img_to_encoding(self, img_array):
         try:
             img_array = cv2.resize(img_array, (160, 160))
+            cv2.imwrite('test.jpg', img_array)
             img_array = np.around(img_array / 255.0, decimals=12)
             img_array = np.expand_dims(img_array, axis=0)
             embedding = self.model.predict_on_batch(img_array)

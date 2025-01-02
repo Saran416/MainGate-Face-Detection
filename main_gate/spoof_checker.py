@@ -45,6 +45,13 @@ class Checker():
         # Process only the first detected face
         face = faces[0]
 
+        (x, y, w, h) = (face.left(), face.top(), face.width(), face.height())
+
+        # Crop the face from the original image
+        cropped_face = image[y:y+h, x:x+w]
+
+        cv2.imwrite("face.jpg", cropped_face)
+
         # Get the facial landmarks
         shape = self.predictor(gray, face)
         shape = face_utils.shape_to_np(shape)
@@ -80,15 +87,12 @@ class Checker():
         # cv2.putText(image, f"EAR: {ear:.2f}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
         # cv2.putText(image, f"MAR: {mar:.2f}", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2)
 
-        (x, y, w, h) = (face.left(), face.top(), face.width(), face.height())
 
-        # Crop the face from the original image
-        cropped_face = image[y:y+h, x:x+w]
         return image,True, cropped_face
 
     def check_spoof(self):
         if self.blink_counter > 0:
-            print("Blink detected. Real face.")
+            print("Real face.")
             self.blink_counter = 0
             return True
 
