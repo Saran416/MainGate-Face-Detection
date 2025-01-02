@@ -2,6 +2,7 @@ from imutils import face_utils
 import dlib
 import numpy as np
 import cv2
+import copy
 
 class Checker():
     def __init__(self, predictor_path="./spoof_detection/shape_predictor_68_face_landmarks.dat"):
@@ -48,9 +49,7 @@ class Checker():
         (x, y, w, h) = (face.left(), face.top(), face.width(), face.height())
 
         # Crop the face from the original image
-        cropped_face = image[y:y+h, x:x+w]
-
-        cv2.imwrite("face.jpg", cropped_face)
+        cropped_face = copy.deepcopy(image[y:y+h, x:x+w])
 
         # Get the facial landmarks
         shape = self.predictor(gray, face)
@@ -71,23 +70,22 @@ class Checker():
         ear = (left_ear + right_ear) / 2.0
 
         # Check for blink
-        if(self.prev_ear - ear > 0.1):
+        if(self.prev_ear - ear > 0.08):
             self.blink_counter += 1
             print("Blink detected")
 
         self.prev_ear = ear
 
         # Extract the coordinates for the mouth
-        mouth = shape[48:68]  # Indices for the mouth (outer lips)
+        # mouth = shape[48:68]  # Indices for the mouth (outer lips)
 
-        # Calculate MAR for the mouth
-        mar = self.calculate_mar(mouth)
+        # # Calculate MAR for the mouth
+        # mar = self.calculate_mar(mouth)
 
         # Display EAR and MAR on the frame
         # cv2.putText(image, f"EAR: {ear:.2f}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
         # cv2.putText(image, f"MAR: {mar:.2f}", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2)
-
-
+        # cv2.imwrite("face.jpg", cropped_face)
         return image,True, cropped_face
 
     def check_spoof(self):

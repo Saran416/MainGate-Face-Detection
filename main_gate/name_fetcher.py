@@ -11,7 +11,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 class Fetcher():
-    def __init__(self, port=27017, db_name='faces', kmeans_clusters=5, data_path='../data_generation/cropped_data', model_path='../model', min_similarity=0.85, load_vectors=True, pkl_path='./img_vectors.pkl'):
+    def __init__(self, port=27017, db_name='faces', kmeans_clusters=5, data_path='../data_generation/cropped_data', model_path='../model', min_similarity=0.7, load_vectors=True, pkl_path='./img_vectors.pkl'):
         self.client = MongoClient('localhost', port)
         self.db = self.client[db_name]
         self.clusters_size = kmeans_clusters
@@ -56,8 +56,10 @@ class Fetcher():
     # return the encoding of the image
     def img_to_encoding(self, img_array):
         try:
-            img_array = cv2.resize(img_array, (160, 160))
-            cv2.imwrite('test.jpg', img_array)
+            # img_array = cv2.resize(img_array, (160, 160))
+            cv2.imwrite('temp.jpg', img_array)
+            img = tf.keras.preprocessing.image.load_img('./temp.jpg', target_size=(160, 160))
+            img_array = tf.keras.preprocessing.image.img_to_array(img)
             img_array = np.around(img_array / 255.0, decimals=12)
             img_array = np.expand_dims(img_array, axis=0)
             embedding = self.model.predict_on_batch(img_array)
@@ -95,7 +97,7 @@ class Fetcher():
         db = self.db
         img_vector = self.img_to_encoding(img)
         if img_vector is None:
-            return None
+            return None, None
         img_vector = [img_vector.flatten()]
         class_name = str(self.kmeans.predict(img_vector)[0])
         collection = db[class_name]
@@ -129,7 +131,7 @@ class Fetcher():
     def fetch_name(self, img):
         start = time()
         name, class_name = self.check_in_collection(img)
-        if not name:
+        if name is None:
             print("Miss in collection")
             name = self.check_in_database(img, class_name)
             if not name:
