@@ -8,8 +8,8 @@ warnings.filterwarnings("ignore")
 
 checker = Checker()
 fetcher = Fetcher(load_vectors=False)
-# fetcher.save_to_unoptimized_db()
-# fetcher.save_vectors('./img_vectors.pkl') 
+# fetcher.save_to_db()
+# fetcher.save_vectors('./img_vectors.pkl')
 
 
 # fetcher.save_to_db()
@@ -43,11 +43,11 @@ while True:
     image, foundface, face = checker.idle(image)
 
 
-
     current_time = time.time()
     if current_time - prev_time >= buffer:
         
         if foundface:
+            cv2.imshow("Face", face)
             # cv2.imwrite("test1.jpg", face)
             name = fetcher.fetch_name(face)
         else:

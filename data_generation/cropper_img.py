@@ -1,7 +1,5 @@
-import cvzone
-from cvzone.FaceDetectionModule import FaceDetector
+from dlib import get_frontal_face_detector
 import cv2
-import os 
 
 class Cropping:
     def __init__(self, offset_w=20, offset_h=20):
@@ -12,37 +10,29 @@ class Cropping:
         """
         self.offset_w = offset_w
         self.offset_h = offset_h
-        self.detector = FaceDetector(minDetectionCon=0.5, modelSelection=0)
+        self.detector = get_frontal_face_detector()
 
     def crop_face(self, image):
-        """
-        Detects face in the image and crops them with offsets.
-
-        :param image: The input image (as a numpy array).
-        :return: List of cropped face images.
-        """
         if image is None:
             raise ValueError("Invalid image input. Please provide a valid image.")
         
-        # Detect faces in the image
-        img, bboxs = self.detector.findFaces(image, draw=False)
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-        if not bboxs:
-            print("No faces detected in the image.")
-            return 
-        for i, bbox in enumerate(bboxs):
-            # Get bounding box coordinates and size
-            x, y, w, h = bbox['bbox']
+        # Detect faces in the grayscale image
+        faces = self.detector(gray, 0)
+        if not faces:
+            # print("No faces found in the image.")
+            return None
 
-            offsetW = (self.offset_w / 100) * w
-            x = int(x - offsetW)
-            w = int(w + offsetW * 2)
-            offsetH = (self.offset_h / 100) * h
-            y = int(y - offsetH * 3)
-            h = int(h + offsetH * 3.5)
+        # Process only the first detected face
+        face = max(faces, key=lambda face: face.width() * face.height())
 
-            # Crop the region of interest
-            cropped_face = img[y:y + h, x:x + w]
+        (x, y, w, h) = (face.left(), face.top(), face.width(), face.height())
+
+        # Crop the face from the original image
+        cropped_face = image[y:y+h, x:x+w]
+
+        # print(type(cropped_face))
         return cropped_face
 
 

@@ -42,9 +42,8 @@ class Checker():
             # print("No faces found in the image.")
             return image, False, []
 
-        
         # Process only the first detected face
-        face = faces[0]
+        face = max(faces, key=lambda face: face.width() * face.height())
 
         (x, y, w, h) = (face.left(), face.top(), face.width(), face.height())
 
@@ -93,5 +92,4 @@ class Checker():
             print("Real face.")
             self.blink_counter = 0
             return True
-
         return False

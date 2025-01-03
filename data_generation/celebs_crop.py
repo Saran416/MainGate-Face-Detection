@@ -33,7 +33,10 @@ for name in sorted(os.listdir(base_dir)):
                 # Call the cropping function
                 img = cv2.imread(img_path)
                 cropped_img = cropper.crop_face(img)
-                cv2.imwrite(os.path.join(new_dir, image), cropped_img)
+                if cropped_img is not None:
+                    cv2.imwrite(os.path.join(new_dir, image), cropped_img)
+                else:
+                    print("No face found in the image", str(os.path.join(new_dir, image)))
             else:
                 print(f"Skipped non-image file: {img_path}")
 
