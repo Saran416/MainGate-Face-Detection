@@ -27,13 +27,12 @@ fps = 0
 num = 0
 prev_time = 0
 name = None
-buffer = 3
+buffer = 0.5
 color = (0, 0, 255)
-
-prev_name = None
+is_real = False
+lastframe_has_face = False
 
 while True:
-    # Capture frame from the webcam
     success, image = cap.read()
     if not success:
         print("Failed to read from webcam.")
@@ -42,36 +41,34 @@ while True:
     image = cv2.flip(image, 1)
     image, foundface, face = checker.idle(image)
 
-
-    current_time = time.time()
-    if current_time - prev_time >= buffer:
-        
-        if foundface:
-            cv2.imshow("Face", face)
-            # cv2.imwrite("test1.jpg", face)
-            name = fetcher.fetch_name(face)
-        else:
-            name = "No face detected"
-        
-        if not name:
-            name = "Invalid Person"
-          
-        
-        if name != prev_name or color == (0, 0, 255):
+    if foundface:
+        current_time = time.time()
+        # print("Face detected")
+        name = "Face Detected"
+        if current_time - prev_time > buffer and lastframe_has_face: 
+            print("Spoof Detection running..")
             is_real = checker.check_spoof()
-
-        if is_real:
-            color = (0, 255, 0)
-        else:
-            color = (0, 0, 255)
+            
+            if is_real:
+                color = (0, 255, 0)
+                # print("Real Image!")
                 
-        prev_time = current_time
-        prev_name = name 
+                person = fetcher.fetch_name(face)
+                if person:
+                    # cv2.imshow("Hello "+ person, face)
+                    print("DETECTED PERSON IN DB" , person)
+                else:
+                    cv2.imshow("DID NOT DETECT PERSON IN DB")
+            else:
+                color = (0, 0, 255)
 
-    # Calculate the position for the text
-    text_size = cv2.getTextSize(name, cv2.FONT_HERSHEY_SIMPLEX, 1, 2)[0]
 
-    # Calculate the position for the text
+            prev_time = current_time
+        lastframe_has_face = True
+    else:
+        name = "No face detected"
+        lastframe_has_face = False
+
     cv2.putText(image, name, (5, 470), cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2)
     # Show the output image
     cv2.imshow("Output", image)
