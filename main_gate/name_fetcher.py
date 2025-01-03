@@ -65,7 +65,8 @@ class Fetcher():
             embedding = self.model.predict_on_batch(img_array)
             return embedding / np.linalg.norm(embedding, ord=2)
         except Exception as e:
-            print("Error in img_to_encoding:", e)
+            # print("Error in img_to_encoding:", e)
+            print("No Face in img_to_encoding")
             return None
 
     # load the images from the data_path and return the encodings (temporarily dataset dir for testing)

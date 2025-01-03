@@ -27,8 +27,8 @@ fps = 0
 num = 0
 prev_time = 0
 name = None
-buffer = 0.5
-color = (0, 0, 255)
+buffer = 1
+color = (0, 255, 0)
 is_real = False
 lastframe_has_face = False
 
@@ -45,22 +45,24 @@ while True:
         current_time = time.time()
         # print("Face detected")
         name = "Face Detected"
-        if current_time - prev_time > buffer and lastframe_has_face: 
-            print("Spoof Detection running..")
+        if current_time - prev_time > buffer: 
+            # print("Spoof Detection running..")
             is_real = checker.check_spoof()
             
             if is_real:
-                color = (0, 255, 0)
+                # color = (0, 255, 0)
                 # print("Real Image!")
                 
                 person = fetcher.fetch_name(face)
                 if person:
                     # cv2.imshow("Hello "+ person, face)
                     print("DETECTED PERSON IN DB" , person)
+                    print('')
                 else:
-                    cv2.imshow("DID NOT DETECT PERSON IN DB")
-            else:
-                color = (0, 0, 255)
+                    print("DID NOT DETECT PERSON IN DB")
+                    print('')
+            # else:
+            #     color = (0, 0, 255)
 
 
             prev_time = current_time
