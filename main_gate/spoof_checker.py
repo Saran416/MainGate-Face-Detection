@@ -70,7 +70,7 @@ class Checker():
         ear = (left_ear + right_ear) / 2.0
 
         # Check for blink
-        if(self.prev_ear - ear > 0.08):
+        if(abs(self.prev_ear - ear) > 0.09 and ear != 0 and self.prev_ear != 0):
             self.blink_counter += 1
             print("Blink detected")
 
