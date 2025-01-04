@@ -7,7 +7,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 checker = Checker()
-fetcher = Fetcher(load_vectors=False)
+fetcher = Fetcher(load_vectors=False)   #first time true, next time on, false and comment the botom two lines
 # fetcher.save_to_db()
 # fetcher.save_vectors('./img_vectors.pkl')
 

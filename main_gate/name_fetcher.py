@@ -11,7 +11,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 class Fetcher():
-    def __init__(self, port=27017, db_name='faces', kmeans_clusters=5, data_path='../data_generation/cropped_data', model_path='../model', min_similarity=0.7, load_vectors=True, pkl_path='./img_vectors.pkl'):
+    def __init__(self, port=27017, db_name='faces', kmeans_clusters=5, data_path='../data_generation/cropped_data', model_path='../model', min_similarity=0.8, load_vectors=True, pkl_path='./img_vectors.pkl'):
         self.client = MongoClient('localhost', port)
         self.db = self.client[db_name]
         self.clusters_size = kmeans_clusters
